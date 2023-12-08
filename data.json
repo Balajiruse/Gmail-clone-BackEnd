@@ -1,0 +1,68 @@
+[
+    {
+      "id": "100",
+      "numberOfSeats": 100,
+      "amenities": ["Ac", "chairs", "discolights"],
+      "price": 5000,
+      "ifBooked": true,
+      "customerName": "Balaji",
+      "date": "12-Nov-2023",
+      "startTime": "12-Nov-2023 at 12PM",
+      "endTime": "11-Nov-2020 at 11am",
+      "RoomId": 201,
+      "RoomName": "Grand"
+    },
+    {
+      "id": "101",
+      "numberOfSeats": 100,
+      "amenities": ["Ac", "chairs", "discolights"],
+      "price": 5000,
+      "ifBooked": false,
+      "customerName": "",
+      "date": "",
+      "startTime": "",
+      "endTime": "",
+      "RoomId": 202,
+      "RoomName": "Grand"
+    },
+    {
+      "id": "102",
+      "numberOfSeats": 50,
+      "amenities": ["Ac", "chairs"],
+      "price": 3000,
+      "ifBooked": false,
+      "customerName": "",
+      "date": "",
+      "startTime": "",
+      "endTime": "",
+      "RoomId": 203,
+      "RoomName": "Classic"
+    },
+    {
+      "id": "103",
+      "numberOfSeats": 100,
+      "amenities": ["Ac", "chairs", "discolights"],
+      "price": 5000,
+      "ifBooked": true,
+      "customerName": "Kasini",
+      "date": "12-Nov-2022",
+      "startTime": "15-Nov-2022 at 12PM",
+      "endTime": "16-Nov-2020 at 11am",
+      "RoomId": 204,
+      "RoomName": "Premium"
+    },
+    {
+      "id": "104",
+      "numberOfSeats": 200,
+      "amenities": ["Ac", "chairs", "discolights", "buffet"],
+      "price": 9000,
+      "ifBooked": true,
+      "customerName": "Dharshan",
+      "date": "06-Nov-2022",
+      "startTime": "11-Nov-2022 at 12PM",
+      "endTime": "12-Nov-2020 at 11am",
+      "RoomId": 205,
+      "RoomName": "Premium"
+    }
+  ]
+  
