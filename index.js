@@ -75,7 +75,7 @@ const hallData = [
 
 //get request logic and method
 
-app.get("/", (request, response) => {
+app.get("/hall-details", (request, response) => {
   //to check the details of the booked rooms logic using request.query 
   const { ifBooked, numberOfSeats } = request.query;
   console.log(request.query, ifBooked);
