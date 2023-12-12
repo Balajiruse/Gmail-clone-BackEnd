@@ -1,72 +1,151 @@
-// const express = require("express");
-// const {mongoClient, MongoClient} = require("mongodb")
-import express from "express";
+import express  from "express"
 const app = express();
-const PORT = 9000;
-app.use(express.json());
+import { MongoClient } from "mongodb";
+import dotenv from "dotenv";
+dotenv.config();
+const URL =process.env.DB
+app.use(express.json())
+let mentor = [];
+let student = [];
 
-//get request logic and method
+ 
+  app.get('/', (req, res) => {
+    res.status(200).json({
+      message: 'Welcome to Mentor and Student assigning with database'
+    });
+  });
 
-app.get("/hall-details", (request, response) => {
-  //to check the details of the booked rooms logic using request.query 
-  const { ifBooked, numberOfSeats } = request.query;
-  console.log(request.query, ifBooked);
-  console.log(request.query, numberOfSeats);
-  let filteredHall = hallData;
-  if (ifBooked) {
-    filteredHall = filteredHall.filter((halls) => halls.ifBooked === ifBooked);
+app.post("/create_mentor", async (req, res) => {
+  try {
+    const connection = await mongoclient.connect(URL);
+    const db = connection.db("mentorstudents");
+    const mentor = await db.collection("mentors").insertOne(req.body);
+    await connection.close();
+    res.json({ message: "Mentor created", id: mentor.insertedId });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Something went wrong" });
   }
-  if (numberOfSeats) {
-    filteredHall = filteredHall.filter(
-      (halls) => halls.numberOfSeats >= +numberOfSeats
-    );
+});
+
+app.post("/create_student", async (req, res) => {
+  try {
+    const connection = await mongoclient.connect(URL);
+    const db = connection.db("mentorstudents");
+    const student = await db.collection("students").insertOne(req.body);
+    await connection.close();
+    res.json({ message: "Student created", id: student.insertedId });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Something went wrong" });
   }
-  response.send(filteredHall);
 });
 
-//getting specific id
-
-app.get("/hall-details/:id", (request, response) => {
-  //to get the details of the specif room using params
-  const { id } = request.params;
-  console.group(id);
-  //
-  //   const halls = hallData.filter((hall)=>hall.id === id)[0];
-  const halls = hallData.find((hall) => hall.id === id);
-  response.send(halls);
+/** get all mentors */
+app.get("/mentors", async (req, res) => {
+  try {
+    const connection = await mongoclient.connect(URL);
+    const db = connection.db("mentorstudents");
+    const mentor = await db.collection("mentors").find({}).toArray();
+    await connection.close();
+    res.json(mentor);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Something went wrong" });
+  }
 });
 
-//posting a new hall
+/** get student */
 
-app.post("/hall/add", (req, res) => {
-  const newHall = {
-    id: hallData.length + 1,
-    numberOfSeats: req.body.numberOfSeats,
-    amenities: req.body.amenities,
-    price: req.body.price,
-    RoomId: req.body.RoomId,
-  };
-  hallData.push(newHall);
-  res.send(newHall);
+app.get("/students", async (req, res) => {
+  try {
+    const connection = await mongoclient.connect(URL);
+    const db = connection.db("assignment");
+    const student = await db.collection("students").find({}).toArray();
+    await connection.close();
+    res.json(student);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Something went wrong" });
+  }
 });
 
-//updating a new hall which is not booked 
-app.put("/hall/edit/:id", (req, res) => {
-  const { id } = req.params;
-  const halls = hallData.find((hall) => hall.id === id);
-  //logic for not updating an already booked room.
-  if (halls.ifBooked === "true") {
-    res.status(400).send("Hey this room is already booked");
-    return;
-  } else halls.customerName = req.body.customerName;
-  halls.date = req.body.date;
-  halls.startTime = req.body.startTime;
-  halls.endTime = req.body.endTime;
-  res.send(halls);
+/** assign student to a mentor */
+app.put("/assign_student/:id", async (req, res) => {
+  try {
+    const connection = await mongoclient.connect(URL);
+    const db = connection.db("mentorstudents");
+    const mentordata = await db
+      .collection("mentors")
+      .findOne({ _id: mongodb.ObjectId(req.params.id) });
+    if (mentordata) {
+      delete req.body._id;
+      const mentor = await db
+        .collection("mentors")
+        .updateOne(
+          { _id: mongodb.ObjectId(req.params.id) },
+          { $set: req.body }
+        );
+      await connection.close();
+
+      res.json(mentor);
+    } else {
+      res.status(404).json({ message: "mentor not found" });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Something went wrong" });
+  }
 });
 
-//deliving the Port address. 
+/** show all students of particular mentor */
 
-app.listen(PORT, () =>
-  console.log(`Server started on port: localhost:${PORT}/hall-details`, PORT)
-);
+app.get("/mentor_student/:id", async (req, res) => {
+  try {
+    const connection = await mongoclient.connect(URL);
+    const db = connection.db("mentorstudents");
+    const mentor = await db
+      .collection("mentors")
+      .findOne({ _id: mongodb.ObjectId(req.params.id) });
+    await connection.close();
+    if (mentor) {
+      res.json(`students name : ${mentor.student} assigned to ${mentor.name}`);
+    } else {
+      res.status(404).json({ message: "Mentor not found" });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Something went wrong" });
+  }
+});
+/** assign or change mentor for student */
+app.put("/assign_change_mentor/:id", async(req, res) => {
+    try {
+        const connection = await mongoclient.connect(URL);
+        const db = connection.db("mentorstudents");
+        const studentdata = await db
+        .collection("students")
+        .findOne({ _id: mongodb.ObjectId(req.params.id) });
+        if (studentdata) {
+            delete req.body._id;
+            const student = await db
+              .collection("students")
+              .updateOne(
+                { _id: mongodb.ObjectId(req.params.id) },
+                { $set: req.body }
+              );
+            await connection.close();
+      
+            res.json(student);
+          } else {
+            res.status(404).json({ message: "Student not found" });
+          }
+        await connection.close();
+        res.json(student);
+      } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Something went wrong" });
+      }
+});
+
+app.listen(process.env.PORT || 7000);
