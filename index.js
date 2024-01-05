@@ -3,10 +3,6 @@ const app = express();
 import { MongoClient } from "mongodb";
 import dotenv from "dotenv";
 dotenv.config();
-const URL =process.env.DB
-app.use(express.json())
-let mentor = [];
-let student = [];
 
  
   app.get('/', (req, res) => {
