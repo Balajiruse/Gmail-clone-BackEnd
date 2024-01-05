@@ -1,147 +1,49 @@
-import express  from "express"
-const app = express();
+import express from "express";
+import * as dotenv from 'dotenv';
 import { MongoClient } from "mongodb";
-import dotenv from "dotenv";
+import cors from 'cors';
+import userRouter from './routes/user.route.js';
+
 dotenv.config();
+const app = express();
+const PORT = process.env.PORT;
 
- 
-  app.get('/', (req, res) => {
-    res.status(200).json({
-      message: 'Welcome to Mentor and Student assigning with database'
-    });
-  });
+//Mongodb connection
 
-app.post("/create_mentor", async (req, res) => {
-  try {
-    const connection = await mongoclient.connect(URL);
-    const db = connection.db("mentorstudents");
-    const mentor = await db.collection("mentors").insertOne(req.body);
-    await connection.close();
-    res.json({ message: "Mentor created", id: mentor.insertedId });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Something went wrong" });
-  }
+const MONGO_URL = process.env.MONGO_URL;
+const client = new MongoClient(MONGO_URL);
+await client.connect();
+console.log('mongodb is connected');
+
+app.use(express.json());
+app.use(cors());
+
+app.get("/", function (request, response) {
+    response.send("The Server is Running😍😍😍");
 });
 
-app.post("/create_student", async (req, res) => {
-  try {
-    const connection = await mongoclient.connect(URL);
-    const db = connection.db("mentorstudents");
-    const student = await db.collection("students").insertOne(req.body);
-    await connection.close();
-    res.json({ message: "Student created", id: student.insertedId });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Something went wrong" });
-  }
+app.use("/user", userRouter);
+
+//insert mails to inbox
+app.post("/inbox", async (request, response) => {
+    const data = request.body;
+    const result = await client.db('gmailClone')
+        .collection('inbox')
+        .insertMany(data);
+
+    response.send(result);
 });
 
-/** get all mentors */
-app.get("/mentors", async (req, res) => {
-  try {
-    const connection = await mongoclient.connect(URL);
-    const db = connection.db("mentorstudents");
-    const mentor = await db.collection("mentors").find({}).toArray();
-    await connection.close();
-    res.json(mentor);
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Something went wrong" });
-  }
+//get mails for inbox
+app.get("/inbox", async (request, response) => {
+    const mails = await client.db('gmailClone')
+        .collection('inbox')
+        .find({})
+        .toArray();
+
+    response.send(mails);
 });
 
-/** get student */
+app.listen(PORT, () => console.log(`The server started in: ${PORT} ✨✨`));
 
-app.get("/students", async (req, res) => {
-  try {
-    const connection = await mongoclient.connect(URL);
-    const db = connection.db("assignment");
-    const student = await db.collection("students").find({}).toArray();
-    await connection.close();
-    res.json(student);
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Something went wrong" });
-  }
-});
-
-/** assign student to a mentor */
-app.put("/assign_student/:id", async (req, res) => {
-  try {
-    const connection = await mongoclient.connect(URL);
-    const db = connection.db("mentorstudents");
-    const mentordata = await db
-      .collection("mentors")
-      .findOne({ _id: mongodb.ObjectId(req.params.id) });
-    if (mentordata) {
-      delete req.body._id;
-      const mentor = await db
-        .collection("mentors")
-        .updateOne(
-          { _id: mongodb.ObjectId(req.params.id) },
-          { $set: req.body }
-        );
-      await connection.close();
-
-      res.json(mentor);
-    } else {
-      res.status(404).json({ message: "mentor not found" });
-    }
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Something went wrong" });
-  }
-});
-
-/** show all students of particular mentor */
-
-app.get("/mentor_student/:id", async (req, res) => {
-  try {
-    const connection = await mongoclient.connect(URL);
-    const db = connection.db("mentorstudents");
-    const mentor = await db
-      .collection("mentors")
-      .findOne({ _id: mongodb.ObjectId(req.params.id) });
-    await connection.close();
-    if (mentor) {
-      res.json(`students name : ${mentor.student} assigned to ${mentor.name}`);
-    } else {
-      res.status(404).json({ message: "Mentor not found" });
-    }
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Something went wrong" });
-  }
-});
-/** assign or change mentor for student */
-app.put("/assign_change_mentor/:id", async(req, res) => {
-    try {
-        const connection = await mongoclient.connect(URL);
-        const db = connection.db("mentorstudents");
-        const studentdata = await db
-        .collection("students")
-        .findOne({ _id: mongodb.ObjectId(req.params.id) });
-        if (studentdata) {
-            delete req.body._id;
-            const student = await db
-              .collection("students")
-              .updateOne(
-                { _id: mongodb.ObjectId(req.params.id) },
-                { $set: req.body }
-              );
-            await connection.close();
-      
-            res.json(student);
-          } else {
-            res.status(404).json({ message: "Student not found" });
-          }
-        await connection.close();
-        res.json(student);
-      } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: "Something went wrong" });
-      }
-});
-
-app.listen(process.env.PORT || 7000);
+export { client };
