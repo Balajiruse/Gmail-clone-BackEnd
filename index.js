@@ -1,12 +1,10 @@
-import express from "express";
-import * as dotenv from 'dotenv';
 import { MongoClient } from "mongodb";
+import express from "express";
+import dotenv from "dotenv";
 import cors from 'cors';
 import userRouter from './routes/user.route.js';
 
 dotenv.config();
-const app = express();
-const PORT = process.env.PORT;
 
 //Mongodb connection
 
@@ -16,7 +14,6 @@ await client.connect();
 console.log('mongodb is connected');
 
 app.use(express.json());
-app.use(cors());
 
 app.get("/", function (request, response) {
     response.send("The Server is Running😍😍😍");
@@ -45,5 +42,3 @@ app.get("/inbox", async (request, response) => {
 });
 
 app.listen(PORT, () => console.log(`The server started in: ${PORT} ✨✨`));
-
-export { client };
